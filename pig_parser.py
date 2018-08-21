@@ -6,12 +6,14 @@ import string
 VARNAMES = dict()
 
 def _load(varname, filename):
-    with open(filename, newline='') as csvfile:
-        fileread = csv.reader(csvfile, delimiter=',')
-        return fileread
+    # with open(filename, newline='') as csvfile:
+    #     fileread = csv.reader(csvfile, delimiter=',')
+    #     return fileread
+    VARNAMES[varname] = np.genfromtxt(filename, delimiter=',', dtype=np.int32)
 
 def _dump(varname):
-    pass
+    for row in VARNAMES[varname]:
+        print(','.join(map(str, row)))
 
 def _filter(varnme):
     pass
