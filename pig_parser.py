@@ -68,6 +68,8 @@ def check_var(varname):
     else:
         return False
 
+###############################################################################
+
 def pig_parser(line):
     """Parses string inputs and calls appropriate function"""
     # Checks for blank newlines
@@ -76,27 +78,23 @@ def pig_parser(line):
     else:
         elements = line.split()
 
-    # Dump function - ensures variable to be dumped has been assigned previously
+    # Dump function - asserts varname has been assigned previously
     if elements[0].lower() == 'dump':
         varname = elements[1]
 
-        if check_var(varname):
-            _dump(varname)
-        else:
-            raise KeyError('Variable {} is undefined'.format(varname))
+        assert check_var(varname)
+        _dump(varname)
 
-    # Load function - checks if variable was previously assigned and prevents
-    # overwrite (as do filter and generate) but this can be removed
+    # Load function - asserts varname has not been assigned previously
     elif elements[2].lower() == 'load':
         varname = elements[0]
         filename = elements[3]
 
-        if not check_var(varname):
-            _load(varname, filename)
-        else:
-            raise KeyError('Variable {} was previously assigned'.format(varname))
+        assert not check_var(varname)
+        _load(varname, filename)
 
-    # Filter function
+    # Filter function - asserts varname1 (input array) has been assigned and
+    # varname2 (output array) has not been assigned
     elif elements[2].lower() == 'filter':
         varname1 = elements[3]
         varname2 = elements[0]
@@ -104,16 +102,12 @@ def pig_parser(line):
         value = int(elements[7])
         operator = elements[6]
 
-        if check_var(varname1) and not check_var(varname2):
-            _filter(varname1, varname2, column, value, operator)
-        elif not check_var(varname1):
-            raise KeyError('Variable {} is undefined'.format(varname1))
-        elif check_var(varname2):
-            raise KeyError('Variable {} was previously assigned'.format(varname2))
+        assert check_var(varname1)
+        assert not check_var(varname2)
+        _filter(varname1, varname2, column, value, operator)
 
-    # Generate function - combines and reparses generator commands from elements
-    # and passes a well structured list to the generate function to perform
-    # arithmetic operations
+    # Generate function - combines and reparses generator commands from list
+    # of elements and passes a structured list of commands
     elif elements[2].lower() == 'foreach':
         varname1 = elements[3]
         varname2 = elements[0]
@@ -124,12 +118,10 @@ def pig_parser(line):
             except ValueError:
                 commands[i] = command.split(' ')
                 commands[i][0], commands[i][2] = int(commands[i][0]), int(commands[i][2])
-        if check_var(varname1) and not check_var(varname2):
-            _generate(varname1, varname2, commands)
-        elif not check_var(varname1):
-            raise KeyError('Variable {} is undefined'.format(varname1))
-        elif check_var(varname2):
-            raise KeyError('Variable {} was previously assigned'.format(varname2))
+
+        assert check_var(varname1)
+        assert not check_var(varname2)
+        _generate(varname1, varname2, commands)
 
 
 ###############################################################################
