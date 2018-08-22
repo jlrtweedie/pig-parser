@@ -1,0 +1,6 @@
+a = load myfile.csv
+Dump a
+b = foreach a generate $0, $0 * 2, $1
+Dump b
+c = filter b by $2 < 3
+Dump c
